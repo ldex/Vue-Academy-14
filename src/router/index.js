@@ -19,7 +19,7 @@ const routes = [
     path: '/product/:id',
     name: 'product',
     component: ProductDetails,
-    props: true
+    props: castRouteParamsId
   },
   {
     path: '/about',
@@ -43,4 +43,8 @@ const router = createRouter({
 
 export default router
 
-
+function castRouteParamsId(route) {
+  return {
+    id: Number(route.params.id),
+  };
+}

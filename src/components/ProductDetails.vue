@@ -41,10 +41,10 @@ import ProductService from '@/services/ProductService';
             this.loading = true;
             ProductService.getProduct(this.id)
                 .then(response => {
-                this.product = response.data
+                    this.product = response.data
                 })
                 .catch(error => {
-                this.error = error;
+                    this.error = error;
                 })
                 .finally(() => this.loading = false)
         }
