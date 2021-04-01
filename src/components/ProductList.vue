@@ -13,11 +13,15 @@
                 v-bind:class='{ discontinued: product.discontinued, selected: product === selectedProduct }'
                 @click="onSelect(product)"
                 :title="JSON.stringify(product)">
-                <span class="name">{{ product.name }}</span>
-                <span class="description">{{ product.description }}</span>
-                <span class="price">{{ product.price }}</span>
+                <slot :product="product">
+                  {{ product.price }}
+                </slot>
             </li>
         </ul>
+
+        <div class="right">
+          <router-link to="/product/insert">Create new product...</router-link>
+        </div>
 
         <button @click="prevPage" :disabled="pageNumber===1">
           &lt; Previous

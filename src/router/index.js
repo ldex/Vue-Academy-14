@@ -2,13 +2,22 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Home from '../views/Home.vue'
 import Products from '@/views/Products.vue';
 import ProductDetails from '@/components/ProductDetails.vue';
+import ProductInsert from '@/components/ProductInsert.vue';
 import Error from '@/views/Error.vue';
+import Admin from '@/views/Admin.vue';
+import Login from '@/views/Login.vue';
+import store from '@/store';
 
 const routes = [
   {
     path: '/',
     name: 'Home',
     component: Home
+  },
+  {
+    path: '/login',
+    name: 'login',
+    component: Login
   },
   {
     path: '/products',
@@ -20,6 +29,17 @@ const routes = [
     name: 'product',
     component: ProductDetails,
     props: castRouteParamsId
+  },
+  {
+    path: '/product/insert',
+    name: 'productInsert',
+    component: ProductInsert
+  },
+  {
+    path: '/admin',
+    name: 'admin',
+    component: Admin,
+    meta: { requiresAuth: true }
   },
   {
     path: '/about',
@@ -39,6 +59,14 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes: routes
+})
+
+router.beforeEach((to, from, next) => {
+  if (to.matched.some(record => record.meta.requiresAuth)) {
+    if(!store.getters.loggedIn) {
+      next('/login')
+    } else next()
+  } else next()
 })
 
 export default router
