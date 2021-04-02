@@ -22,35 +22,17 @@ export default createStore({
     SET_PRODUCT(state, payload) {
       state.product = payload;
     },
+    REMOVE_PRODUCT(state, id) {
+      state.products = state.products.filter(product => product.id != id);
+    },
     SET_TOKEN(state, payload) {
-      state.token = payload
-      localStorage.setItem('auth_token', JSON.stringify(payload))
-      axios.defaults.headers.common['Authorization'] = `Bearer ${
-        payload
-      }`
+      state.token = payload;
     }
   },
   actions: {
-    login ({ commit }, credentials) {
-      return axios
-        .post('http://www.mocky.io/v2/5b9149823100002a00939952', credentials) // mocky.io allows us to fake a successful authentication from the server
-        .then(({ data }) => {
-          commit('SET_TOKEN', data.token)
-        })
-    },
-    fetchProducts({commit}) {
-      commit('SET_LOADING_STATUS');
-      return ProductService.getProducts()
-        .then(response => {
-          commit('SET_PRODUCTS', response.data);
-        })
-        .finally(() => commit('SET_LOADING_STATUS'));
-    },
-    addProduct({commit}, newProduct) {
-      return ProductService.insertProduct(newProduct)
-        .then(() => {
-          commit('ADD_PRODUCT', newProduct);
-        })
+    async fetchProducts({commit}) {
+      const response = await ProductService.getProducts()
+      commit('SET_PRODUCTS', response.data);
     },
     fetchProduct({commit,getters}, id) {
       let p = getters.getProductById(id);
@@ -63,10 +45,33 @@ export default createStore({
         commit('SET_PRODUCT', p);
       }
     },
+    addProduct({commit}, newProduct) {
+      return ProductService.insertProduct(newProduct)
+        .then(() => {
+          commit('ADD_PRODUCT', newProduct);
+        })
+    },
+    deleteProduct({ commit }, product) {
+      return ProductService.deleteProduct(product).then(() => {
+        commit("REMOVE_PRODUCT", product.id);
+      });
+    },
+    login ({ commit }, credentials) {
+      return axios
+        .post('http://www.mocky.io/v2/5b9149823100002a00939952', credentials) // mocky.io used to fake a successful authentication from the server
+        .then(({ data }) => {
+          commit('SET_TOKEN', data.token);
+          localStorage.setItem('auth_token', JSON.stringify(data.token));
+          axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`
+        })
+    },
     checkPreviousLogin({ commit }) {
       const existingToken = localStorage.getItem('auth_token');
-      if(existingToken)
-        commit('SET_TOKEN', existingToken)
+      if(existingToken) {
+        commit('SET_TOKEN', existingToken);
+        localStorage.setItem('auth_token', JSON.stringify(existingToken));
+        axios.defaults.headers.common['Authorization'] = `Bearer ${existingToken}`;
+      }
     }
   },
   getters: {

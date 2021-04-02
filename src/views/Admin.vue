@@ -1,6 +1,6 @@
 <template>
     <div>
-        <h1>Admin</h1>
+        <h2>Admin</h2>
         <p>
             Ceci est la page admin sécurisée.
         </p>

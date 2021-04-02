@@ -29,7 +29,9 @@ export default {
     let sortParams = `?$orderby=ModifiedDate%20desc`;
     let forceUpdate = this.clearCache;
     this.clearCache = false;
-    return apiClient.get(RESOURCE_NAME + sortParams, { forceUpdate: forceUpdate })
+    return apiClient
+            .get(RESOURCE_NAME + sortParams, { forceUpdate: forceUpdate })
+            .then(products => new Promise(resolve => setTimeout(() => resolve(products), 200))) // slowing down the response for testing purpose...
   },
 
   getProduct(id) {
@@ -39,5 +41,10 @@ export default {
   insertProduct(product) {
     this.clearCache = true;
     return apiClient.post(RESOURCE_NAME, product)
-  }
+  },
+
+  deleteProduct(product) {
+    this.clearCache = true;
+    return apiClient.delete(`${RESOURCE_NAME}/${product.id}`)
+  },
 }

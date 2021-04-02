@@ -2,6 +2,7 @@
     <div>
         <h2>{{ title }}</h2>
         <fieldset class="filters">
+          {{itemsNumber}} products |
           Sort by:
           <button @click="sort('name')">Name</button>
           <button @click="sort('price')">Price</button>
@@ -9,14 +10,21 @@
           <span> Filter by name: <input v-model="filterName" /></span>
         </fieldset>
         <ul class="products">
-            <li v-for="product in sortedFilteredPaginatedProducts" v-bind:key="product.id"
-                v-bind:class='{ discontinued: product.discontinued, selected: product === selectedProduct }'
-                @click="onSelect(product)"
-                :title="JSON.stringify(product)">
+            <router-link
+              v-for="product in sortedFilteredPaginatedItems" v-bind:key="product.id"
+              :to="'/product/' + product.id"
+              custom v-slot="{ navigate }">
+              <li role="link"
+                  class="text"
+                  v-bind:class='{ discontinued: product.discontinued, selected: product === selectedItem }'
+                  :title="JSON.stringify(product)"
+                   @click="navigate"
+                  >
                 <slot :product="product">
-                  {{ product.price }}
+                    {{ product.name }}
                 </slot>
-            </li>
+              </li>
+            </router-link>
         </ul>
 
         <div class="right">
@@ -34,86 +42,28 @@
 </template>
 
 <script>
+import useList from "@/composables/items-list";
 
 export default {
     props: {
-        products: {
-            type: Array,
-            default: () => []
-        },
-        pageSize: {
-            type: Number,
-            required: false,
-            default: 5
-        }
+      products: {
+        type: Array
+      },
+      pageSize: {
+        type: Number,
+        required: false,
+        default: 5
+      },
+      title: {
+        type: String,
+        default: "Products"
+      }
     },
-    data() {
-        return {
-            title: "Products",
-            selectedProduct: null,
-            filterName: '',
-            sortName: 'modifiedDate',
-            sortDir: 'desc',
-            pageNumber: 1,
-        }
-    },
-    computed: {
-        filteredProducts() {
-            let filter = new RegExp(this.filterName, 'i')
-            return this.products.filter(el => el.name.match(filter))
-        },
-        sortedFilteredProducts() {
-            return [...this.filteredProducts].sort((a,b) => {
-              let modifier = 1;
-              if(this.sortDir === 'desc') modifier = -1;
-              if(a[this.sortName] < b[this.sortName]) return -1 * modifier;
-              if(a[this.sortName] > b[this.sortName]) return 1 * modifier;
-              return 0;
-            })
-        },
-        sortedFilteredPaginatedProducts() {
-            const start = (this.pageNumber-1) * this.pageSize,
-                    end = start + this.pageSize;
-
-            return this.sortedFilteredProducts.slice(start, end);
-        },
-        pageCount() {
-            let l = this.filteredProducts.length,
-              s = this.pageSize;
-            return Math.ceil(l / s);
-        }
-    },
-    methods: {
-        sort:function(s) {
-            //if s == current sort, reverse order
-            if(s === this.sortName) {
-                this.sortDir = this.sortDir==='asc'?'desc':'asc';
-            }
-            this.sortName = s;
-        },
-        nextPage() {
-            this.pageNumber++;
-        },
-        prevPage() {
-            this.pageNumber--;
-        },
-        onSelect(product) {
-          this.$router.push({ name: "product", params: { id: product.id } });
-        }
-    },
-    watch: {
-        // reset pagination when filtering
-        filterName() {
-            this.pageNumber = 1;
-        },
-        // reset pagination when sorting
-        sortName() {
-            this.pageNumber = 1;
-        },
-        sortDir() {
-            this.pageNumber = 1;
-        }
-    },
+    setup (props) {
+      return {
+        ...useList(props.products, props.pageSize, "modifiedDate", "desc"),
+      }
+    }
 }
 </script>
 
@@ -160,8 +110,11 @@ export default {
     color: white;
   }
   .products .text {
-    position: relative;
-    top: -3px;
+    padding: 0.5em 0.7em 0em 0.7em;
+    line-height: 1em;
+    left: -1px;
+    top: -4px;
+    height: 1.8em;
   }
   .products .name {
     display: inline-block;

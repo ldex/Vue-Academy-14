@@ -1,6 +1,6 @@
-# Vue Demo App
+# Vue Academy Demo App
 
-Demo Project part of <a href="https://vue.ac" target="_blank">Vue Academy Workshop</a> in 2021.
+Demo Project coded during a <a href="https://vue.ac" target="_blank">Vue Academy Workshop</a> in 2021.
 
 ## Project setup
 
